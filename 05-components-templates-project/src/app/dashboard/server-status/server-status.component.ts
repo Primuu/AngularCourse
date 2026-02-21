@@ -1,4 +1,12 @@
-import { Component, DestroyRef, inject, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 
 @Component({
   selector: 'app-server-status',
@@ -7,15 +15,27 @@ import { Component, DestroyRef, inject, OnDestroy, OnInit } from '@angular/core'
   templateUrl: './server-status.component.html',
   styleUrl: './server-status.component.css',
 })
-export class ServerStatusComponent implements 
-  OnInit
-  // , OnDestroy 
-  {
-  currentStatus: 'online' | 'offline' | 'unknown' = 'online';
+// , OnDestroy
+export class ServerStatusComponent implements OnInit {
+  currentStatus = signal<'online' | 'offline' | 'unknown'>('offline');
   // private interval?: ReturnType<typeof setInterval>;
   private destroyRef = inject(DestroyRef);
 
-  constructor() {}
+  constructor() {
+    effect(() => {
+      console.log(this.currentStatus());
+    });
+
+    // effect((onCleanup) => {
+    //   const tasks = getTasks();
+    //   const timer = setTimeout(() => {
+    //     console.log(`Current number of tasks: ${tasks().length}`);
+    //   }, 1000);
+    //   onCleanup(() => {
+    //     clearTimeout(timer);
+    //   });
+    // });
+  }
 
   ngOnInit() {
     // this.interval = setInterval(() => {
@@ -23,11 +43,11 @@ export class ServerStatusComponent implements
       const rnd = Math.random();
 
       if (rnd < 0.5) {
-        this.currentStatus = 'online';
+        this.currentStatus.set('online');
       } else if (rnd < 0.9) {
-        this.currentStatus = 'offline';
+        this.currentStatus.set('offline');
       } else {
-        this.currentStatus = 'unknown';
+        this.currentStatus.set('unknown');
       }
     }, 5000);
 
